@@ -27,6 +27,7 @@ public class HurricaneService implements CRUDOperations<Hurricane> {
 
 			data.setDisasterName(AESUtil.encrypt(data.getDisasterName()));
 			data.setUuid(AESUtil.encrypt(data.getUuid()));
+			data.setDescription(AESUtil.encrypt(data.getDescription()));
 			data.getPlace().getDisasters().add(data);
 			aux.create(data.getPlace());
 			hurRepo.save(data);
@@ -65,6 +66,7 @@ public class HurricaneService implements CRUDOperations<Hurricane> {
 			Hurricane temp = found.get();
 			temp.setDisasterName(AESUtil.encrypt(newData.getDisasterName()));
 			temp.setUuid(AESUtil.encrypt(newData.getUuid()));
+			temp.setDescription(AESUtil.encrypt(newData.getDescription()));
 			temp.getPlace().getDisasters().add(newData);
 			aux.create(temp.getPlace());
 			hurRepo.save(temp);
@@ -92,7 +94,5 @@ public class HurricaneService implements CRUDOperations<Hurricane> {
 	public boolean exists(String uuid) {
 		return hurRepo.findByUuid(uuid).isEmpty();
 	}
-
-
 
 }

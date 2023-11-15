@@ -21,6 +21,7 @@ public class NaturalDisaster {
 	private Country place;
 	private Investigator[] investigators;
 	private String disasterName;
+	private String description;
 	@Lob
 	private byte[] image;
 
@@ -28,13 +29,14 @@ public class NaturalDisaster {
 	}
 
 	public NaturalDisaster(Long id, String uuid, Country place, Investigator[] investigators, String disasterName,
-			byte[] image) {
+			String description, byte[] image) {
 		super();
 		this.id = id;
 		this.uuid = uuid;
 		this.place = place;
 		this.investigators = investigators;
 		this.disasterName = disasterName;
+		this.description = description;
 		this.image = image;
 	}
 
@@ -86,13 +88,21 @@ public class NaturalDisaster {
 		this.image = image;
 	}
 
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + Arrays.hashCode(image);
 		result = prime * result + Arrays.hashCode(investigators);
-		result = prime * result + Objects.hash(disasterName, id, place, uuid);
+		result = prime * result + Objects.hash(description, disasterName, id, place, uuid);
 		return result;
 	}
 
@@ -105,16 +115,17 @@ public class NaturalDisaster {
 		if (getClass() != obj.getClass())
 			return false;
 		NaturalDisaster other = (NaturalDisaster) obj;
-		return Objects.equals(disasterName, other.disasterName) && Objects.equals(id, other.id)
-				&& Arrays.equals(image, other.image) && Arrays.equals(investigators, other.investigators)
-				&& Objects.equals(place, other.place) && Objects.equals(uuid, other.uuid);
+		return Objects.equals(description, other.description) && Objects.equals(disasterName, other.disasterName)
+				&& Objects.equals(id, other.id) && Arrays.equals(image, other.image)
+				&& Arrays.equals(investigators, other.investigators) && Objects.equals(place, other.place)
+				&& Objects.equals(uuid, other.uuid);
 	}
 
 	@Override
 	public String toString() {
 		return "NaturalDisaster [id=" + id + ", uuid=" + uuid + ", place=" + place + ", investigators="
-				+ Arrays.toString(investigators) + ", disasterName=" + disasterName + ", image="
-				+ Arrays.toString(image) + "]";
+				+ Arrays.toString(investigators) + ", disasterName=" + disasterName + ", description=" + description
+				+ ", image=" + Arrays.toString(image) + "]";
 	}
 
 }

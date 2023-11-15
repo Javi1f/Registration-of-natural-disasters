@@ -25,17 +25,11 @@ public class Tsunami extends NaturalDisaster {
 		this.waveHeight = waveHeight;
 	}
 
-	public Tsunami(Long id, String uuid, Country place, Investigator[] investigators, String disasterName, byte[] image,
-			Long id2, float waveHeight) {
-		super(id, uuid, place, investigators, disasterName, image);
+	public Tsunami(Long id, String uuid, Country place, Investigator[] investigators, String disasterName,
+			String description, byte[] image, Long id2, float waveHeight) {
+		super(id, uuid, place, investigators, disasterName, description, image);
 		id = id2;
 		this.waveHeight = waveHeight;
-	}
-
-	public Tsunami(Long id, String uuid, Country place, Investigator[] investigators, String disasterName,
-			byte[] image) {
-		super(id, uuid, place, investigators, disasterName, image);
-		// TODO Auto-generated constructor stub
 	}
 
 	public Long getId() {

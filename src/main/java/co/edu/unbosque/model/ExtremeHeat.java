@@ -26,16 +26,10 @@ public class ExtremeHeat extends NaturalDisaster {
 	}
 
 	public ExtremeHeat(Long id, String uuid, Country place, Investigator[] investigators, String disasterName,
-			byte[] image, Long id2, float maximumTemperature) {
-		super(id, uuid, place, investigators, disasterName, image);
+			String description, byte[] image, Long id2, float maximumTemperature) {
+		super(id, uuid, place, investigators, disasterName, description, image);
 		id = id2;
 		this.maximumTemperature = maximumTemperature;
-	}
-
-	public ExtremeHeat(Long id, String uuid, Country place, Investigator[] investigators, String disasterName,
-			byte[] image) {
-		super(id, uuid, place, investigators, disasterName, image);
-		// TODO Auto-generated constructor stub
 	}
 
 	public Long getId() {

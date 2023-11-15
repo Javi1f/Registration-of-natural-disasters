@@ -9,18 +9,18 @@ import co.edu.unbosque.model.VolcanicEruption;
 import co.edu.unbosque.repository.VolcanicEruptionRepository;
 import co.edu.unbosque.util.AESUtil;
 
-public class VolcanicEruptionService implements CRUDOperations<VolcanicEruption>{
+public class VolcanicEruptionService implements CRUDOperations<VolcanicEruption> {
 
 	@Autowired
 	private VolcanicEruptionRepository volRepo;
-	
+
 	@Autowired
 	private CountryService aux;
-	
+
 	public VolcanicEruptionService() {
 		// TODO Auto-generated constructor stub
 	}
-	
+
 	@Override
 	public int create(VolcanicEruption data) {
 
@@ -28,6 +28,7 @@ public class VolcanicEruptionService implements CRUDOperations<VolcanicEruption>
 
 			data.setDisasterName(AESUtil.encrypt(data.getDisasterName()));
 			data.setUuid(AESUtil.encrypt(data.getUuid()));
+			data.setDescription(AESUtil.encrypt(data.getDescription()));
 			data.getPlace().getDisasters().add(data);
 			aux.create(data.getPlace());
 			volRepo.save(data);
@@ -66,6 +67,7 @@ public class VolcanicEruptionService implements CRUDOperations<VolcanicEruption>
 			VolcanicEruption temp = found.get();
 			temp.setDisasterName(AESUtil.encrypt(newData.getDisasterName()));
 			temp.setUuid(AESUtil.encrypt(newData.getUuid()));
+			temp.setDescription(AESUtil.encrypt(newData.getDescription()));
 			temp.getPlace().getDisasters().add(newData);
 			aux.create(temp.getPlace());
 			volRepo.save(temp);

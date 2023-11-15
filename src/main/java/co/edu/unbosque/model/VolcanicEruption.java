@@ -11,10 +11,10 @@ import jakarta.persistence.Id;
 @Entity
 @DiscriminatorValue("volcaniceruption")
 public class VolcanicEruption extends NaturalDisaster {
-	
-	private @Id @GeneratedValue(strategy = GenerationType.IDENTITY)Long id;
+
+	private @Id @GeneratedValue(strategy = GenerationType.IDENTITY) Long id;
 	private float scope;
-	
+
 	public VolcanicEruption() {
 		// TODO Auto-generated constructor stub
 	}
@@ -26,16 +26,15 @@ public class VolcanicEruption extends NaturalDisaster {
 	}
 
 	public VolcanicEruption(Long id, String uuid, Country place, Investigator[] investigators, String disasterName,
-			byte[] image, Long id2, float scope) {
-		super(id, uuid, place, investigators, disasterName, image);
+			String description, byte[] image, Long id2, float scope) {
+		super(id, uuid, place, investigators, disasterName, description, image);
 		id = id2;
 		this.scope = scope;
 	}
 
 	public VolcanicEruption(Long id, String uuid, Country place, Investigator[] investigators, String disasterName,
-			byte[] image) {
-		super(id, uuid, place, investigators, disasterName, image);
-		// TODO Auto-generated constructor stub
+			String description, byte[] image) {
+		super(id, uuid, place, investigators, disasterName, description, image);
 	}
 
 	public Long getId() {
@@ -78,7 +77,5 @@ public class VolcanicEruption extends NaturalDisaster {
 	public String toString() {
 		return "VolcanicEruption [id=" + id + ", scope=" + scope + "]";
 	}
-	
-	
-	
+
 }

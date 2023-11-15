@@ -27,6 +27,7 @@ public class ExtremeHeatService implements CRUDOperations<ExtremeHeat> {
 
 			data.setDisasterName(AESUtil.encrypt(data.getDisasterName()));
 			data.setUuid(AESUtil.encrypt(data.getUuid()));
+			data.setDescription(AESUtil.encrypt(data.getDescription()));
 			data.getPlace().getDisasters().add(data);
 			aux.create(data.getPlace());
 			exheRepo.save(data);
@@ -65,6 +66,7 @@ public class ExtremeHeatService implements CRUDOperations<ExtremeHeat> {
 			ExtremeHeat temp = found.get();
 			temp.setDisasterName(AESUtil.encrypt(newData.getDisasterName()));
 			temp.setUuid(AESUtil.encrypt(newData.getUuid()));
+			temp.setDescription(AESUtil.encrypt(newData.getDescription()));
 			temp.getPlace().getDisasters().add(newData);
 			aux.create(temp.getPlace());
 			exheRepo.save(temp);
@@ -92,7 +94,5 @@ public class ExtremeHeatService implements CRUDOperations<ExtremeHeat> {
 	public boolean exists(String uuid) {
 		return exheRepo.findByUuid(uuid).isEmpty();
 	}
-
-
 
 }

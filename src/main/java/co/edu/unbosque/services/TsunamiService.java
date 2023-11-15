@@ -27,6 +27,7 @@ public class TsunamiService implements CRUDOperations<Tsunami> {
 
 			data.setDisasterName(AESUtil.encrypt(data.getDisasterName()));
 			data.setUuid(AESUtil.encrypt(data.getUuid()));
+			data.setDescription(AESUtil.encrypt(data.getDescription()));
 			data.getPlace().getDisasters().add(data);
 			aux.create(data.getPlace());
 			tsuRepo.save(data);
@@ -65,6 +66,7 @@ public class TsunamiService implements CRUDOperations<Tsunami> {
 			Tsunami temp = found.get();
 			temp.setDisasterName(AESUtil.encrypt(newData.getDisasterName()));
 			temp.setUuid(AESUtil.encrypt(newData.getUuid()));
+			temp.setDescription(AESUtil.encrypt(newData.getDescription()));
 			temp.getPlace().getDisasters().add(newData);
 			aux.create(temp.getPlace());
 			tsuRepo.save(temp);

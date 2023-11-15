@@ -26,15 +26,15 @@ public class Earthquake extends NaturalDisaster {
 	}
 
 	public Earthquake(Long id, String uuid, Country place, Investigator[] investigators, String disasterName,
-			byte[] image, Long id2, float magnitude) {
-		super(id, uuid, place, investigators, disasterName, image);
+			String description, byte[] image, Long id2, float magnitude) {
+		super(id, uuid, place, investigators, disasterName, description, image);
 		id = id2;
 		this.magnitude = magnitude;
 	}
 
 	public Earthquake(Long id, String uuid, Country place, Investigator[] investigators, String disasterName,
-			byte[] image) {
-		super(id, uuid, place, investigators, disasterName, image);
+			String description, byte[] image) {
+		super(id, uuid, place, investigators, disasterName, description, image);
 		// TODO Auto-generated constructor stub
 	}
 

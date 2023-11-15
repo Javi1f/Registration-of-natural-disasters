@@ -9,7 +9,7 @@ import co.edu.unbosque.model.Earthquake;
 import co.edu.unbosque.repository.EarthquakeRepository;
 import co.edu.unbosque.util.AESUtil;
 
-public class EarthquakeService implements CRUDOperations<Earthquake>{
+public class EarthquakeService implements CRUDOperations<Earthquake> {
 
 	@Autowired
 	private EarthquakeRepository earthRepo;
@@ -27,6 +27,7 @@ public class EarthquakeService implements CRUDOperations<Earthquake>{
 
 			data.setDisasterName(AESUtil.encrypt(data.getDisasterName()));
 			data.setUuid(AESUtil.encrypt(data.getUuid()));
+			data.setDescription(AESUtil.encrypt(data.getDescription()));
 			data.getPlace().getDisasters().add(data);
 			aux.create(data.getPlace());
 			earthRepo.save(data);
@@ -65,6 +66,7 @@ public class EarthquakeService implements CRUDOperations<Earthquake>{
 			Earthquake temp = found.get();
 			temp.setDisasterName(AESUtil.encrypt(newData.getDisasterName()));
 			temp.setUuid(AESUtil.encrypt(newData.getUuid()));
+			temp.setDescription(AESUtil.encrypt(newData.getDescription()));
 			temp.getPlace().getDisasters().add(newData);
 			aux.create(temp.getPlace());
 			earthRepo.save(temp);
