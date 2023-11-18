@@ -4,17 +4,18 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import co.edu.unbosque.model.ExtremeHeat;
 import co.edu.unbosque.repository.ExtremeHeatRepository;
-import co.edu.unbosque.util.AESUtil;
 
+@Service
 public class ExtremeHeatService implements CRUDOperations<ExtremeHeat> {
 
 	@Autowired
 	private ExtremeHeatRepository exheRepo;
 	@Autowired
-	private CountryService aux;
+	private UuidVerifier verifier;
 
 	public ExtremeHeatService() {
 		// TODO Auto-generated constructor stub
@@ -22,21 +23,9 @@ public class ExtremeHeatService implements CRUDOperations<ExtremeHeat> {
 
 	@Override
 	public int create(ExtremeHeat data) {
-
-		try {
-
-			data.setDisasterName(AESUtil.encrypt(data.getDisasterName()));
-			data.setUuid(AESUtil.encrypt(data.getUuid()));
-			data.setDescription(AESUtil.encrypt(data.getDescription()));
-			data.getPlace().getDisasters().add(data);
-			aux.create(data.getPlace());
-			exheRepo.save(data);
-
-			return 0;
-		} catch (Exception e) {
-			return 1;
-		}
-
+		if(verifier.uuidAlreadyTaked(data.getUuid()))return 1;
+		exheRepo.save(data);
+		return 0;
 	}
 
 	@Override
@@ -47,37 +36,72 @@ public class ExtremeHeatService implements CRUDOperations<ExtremeHeat> {
 	@Override
 	public int deleteById(Long id) {
 		Optional<ExtremeHeat> found = exheRepo.findById(id);
-
 		if (found.isPresent()) {
 			exheRepo.delete(found.get());
 			return 0;
-		} else {
-			return 1;
 		}
+		return 1;
+	}
+	
+	public int deleteByUuid(String uuid) {
+		Optional<ExtremeHeat> found = exheRepo.findByUuid(uuid);
+		if (found.isPresent()) {
+			exheRepo.delete(found.get());
+			return 0;
+		}
+		return 1;
 	}
 
 	@Override
 	public int updateById(Long id, ExtremeHeat newData) {
 
 		Optional<ExtremeHeat> found = exheRepo.findById(id);
-		Optional<ExtremeHeat> newFound = exheRepo.findByUuid(AESUtil.encrypt(newData.getUuid()));
-
-		if (found.isPresent() && !newFound.isPresent()) {
+		boolean taked = false;
+		if(found.isPresent())taked = verifier.uuidAlreadyTaked(newData.getUuid(),found.get().getUuid());
+		else taked = verifier.uuidAlreadyTaked(newData.getUuid());
+		if (found.isPresent() && !taked) {
 			ExtremeHeat temp = found.get();
-			temp.setDisasterName(AESUtil.encrypt(newData.getDisasterName()));
-			temp.setUuid(AESUtil.encrypt(newData.getUuid()));
-			temp.setDescription(AESUtil.encrypt(newData.getDescription()));
-			temp.getPlace().getDisasters().add(newData);
-			aux.create(temp.getPlace());
+			temp.setDisasterName(newData.getDisasterName());
+			temp.setUuid(newData.getUuid());
+			temp.setDescription(newData.getDescription());
+			temp.setContinent(newData.getContinent());
+			temp.setCountry(newData.getCountry());
+			temp.setInvestigators(newData.getInvestigators());
+			temp.setImage(newData.getImage());
+			temp.setMaximumTemperature(newData.getMaximumTemperature());
 			exheRepo.save(temp);
 			return 0;
-		} else if (found.isPresent() && newFound.isPresent()) {
+		} else if (found.isPresent() && taked) {
 			return 1;
 		} else if (!found.isPresent()) {
 			return 2;
-		} else {
-			return 3;
 		}
+		return 3;
+
+	}
+	
+	public int updateByUuid(String uuid, ExtremeHeat newData) {
+
+		Optional<ExtremeHeat> found = exheRepo.findByUuid(uuid);
+		boolean taked = verifier.uuidAlreadyTaked(newData.getUuid(),uuid);
+		if (found.isPresent() && !taked) {
+			ExtremeHeat temp = found.get();
+			temp.setDisasterName(newData.getDisasterName());
+			temp.setUuid(newData.getUuid());
+			temp.setDescription(newData.getDescription());
+			temp.setContinent(newData.getContinent());
+			temp.setCountry(newData.getCountry());
+			temp.setInvestigators(newData.getInvestigators());
+			temp.setImage(newData.getImage());
+			temp.setMaximumTemperature(newData.getMaximumTemperature());
+			exheRepo.save(temp);
+			return 0;
+		} else if (found.isPresent() && taked) {
+			return 1;
+		} else if (!found.isPresent()) {
+			return 2;
+		}
+		return 3;
 
 	}
 
@@ -92,7 +116,8 @@ public class ExtremeHeatService implements CRUDOperations<ExtremeHeat> {
 	}
 
 	public boolean exists(String uuid) {
-		return exheRepo.findByUuid(uuid).isEmpty();
+		Optional<ExtremeHeat> found=exheRepo.findByUuid(uuid);
+		return found.isPresent();
 	}
 
 }

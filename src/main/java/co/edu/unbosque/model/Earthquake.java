@@ -1,5 +1,6 @@
 package co.edu.unbosque.model;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 import jakarta.persistence.DiscriminatorValue;
@@ -19,31 +20,17 @@ public class Earthquake extends NaturalDisaster {
 		// TODO Auto-generated constructor stub
 	}
 
-	public Earthquake(Long id, float magnitude) {
-		super();
-		this.id = id;
+	public Earthquake(float magnitude) {
 		this.magnitude = magnitude;
 	}
 
-	public Earthquake(Long id, String uuid, Country place, Investigator[] investigators, String disasterName,
-			String description, byte[] image, Long id2, float magnitude) {
-		super(id, uuid, place, investigators, disasterName, description, image);
-		id = id2;
+	public Earthquake(String uuid, String continent, String country, ArrayList<String> investigators, String disasterName,String description, byte[] image,float magnitude) {
+		super(uuid, continent, country, investigators, disasterName, description, image);
 		this.magnitude = magnitude;
 	}
-
-	public Earthquake(Long id, String uuid, Country place, Investigator[] investigators, String disasterName,
-			String description, byte[] image) {
-		super(id, uuid, place, investigators, disasterName, description, image);
-		// TODO Auto-generated constructor stub
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
+	
+	public Earthquake(String uuid, String continent, String country, ArrayList<String> investigators, String disasterName,String description, byte[] image) {
+		super(uuid, continent, country, investigators, disasterName, description, image);
 	}
 
 	public float getMagnitude() {

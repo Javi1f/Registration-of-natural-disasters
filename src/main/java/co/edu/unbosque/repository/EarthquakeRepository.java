@@ -8,9 +8,8 @@ import co.edu.unbosque.model.Earthquake;
 
 public interface EarthquakeRepository extends JpaRepository<Earthquake, Long>{
 
-	public Optional<Earthquake> findByUuid(String name);
-
-	public void deleteByUuid(String name);
+	public Optional<Earthquake> findByUuid(String uuid);
+	public Earthquake getByUuid(String uuid);
 
 
 }

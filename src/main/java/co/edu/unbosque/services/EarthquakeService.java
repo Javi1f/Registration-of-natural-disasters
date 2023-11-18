@@ -4,17 +4,18 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import co.edu.unbosque.model.Earthquake;
 import co.edu.unbosque.repository.EarthquakeRepository;
-import co.edu.unbosque.util.AESUtil;
 
+@Service
 public class EarthquakeService implements CRUDOperations<Earthquake> {
 
 	@Autowired
 	private EarthquakeRepository earthRepo;
 	@Autowired
-	private CountryService aux;
+	private UuidVerifier verifier;
 
 	public EarthquakeService() {
 		// TODO Auto-generated constructor stub
@@ -22,20 +23,9 @@ public class EarthquakeService implements CRUDOperations<Earthquake> {
 
 	@Override
 	public int create(Earthquake data) {
-
-		try {
-
-			data.setDisasterName(AESUtil.encrypt(data.getDisasterName()));
-			data.setUuid(AESUtil.encrypt(data.getUuid()));
-			data.setDescription(AESUtil.encrypt(data.getDescription()));
-			data.getPlace().getDisasters().add(data);
-			aux.create(data.getPlace());
-			earthRepo.save(data);
-
-			return 0;
-		} catch (Exception e) {
-			return 1;
-		}
+		if (verifier.uuidAlreadyTaked(data.getUuid()))return 1;
+		earthRepo.save(data);
+		return 0;
 
 	}
 
@@ -60,25 +50,61 @@ public class EarthquakeService implements CRUDOperations<Earthquake> {
 	public int updateById(Long id, Earthquake newData) {
 
 		Optional<Earthquake> found = earthRepo.findById(id);
-		Optional<Earthquake> newFound = earthRepo.findByUuid(AESUtil.encrypt(newData.getUuid()));
-
-		if (found.isPresent() && !newFound.isPresent()) {
+		boolean taked = false;
+		if(found.isPresent())taked = verifier.uuidAlreadyTaked(newData.getUuid(),found.get().getUuid());
+		else taked = verifier.uuidAlreadyTaked(newData.getUuid());
+		if (found.isPresent() && !taked) {
 			Earthquake temp = found.get();
-			temp.setDisasterName(AESUtil.encrypt(newData.getDisasterName()));
-			temp.setUuid(AESUtil.encrypt(newData.getUuid()));
-			temp.setDescription(AESUtil.encrypt(newData.getDescription()));
-			temp.getPlace().getDisasters().add(newData);
-			aux.create(temp.getPlace());
+			temp.setDisasterName(newData.getDisasterName());
+			temp.setUuid(newData.getUuid());
+			temp.setDescription(newData.getDescription());
+			temp.setContinent(newData.getContinent());
+			temp.setCountry(newData.getCountry());
+			temp.setInvestigators(newData.getInvestigators());
+			temp.setImage(newData.getImage());
+			temp.setMagnitude(newData.getMagnitude());
 			earthRepo.save(temp);
 			return 0;
-		} else if (found.isPresent() && newFound.isPresent()) {
+		} else if (found.isPresent() && taked) {
 			return 1;
 		} else if (!found.isPresent()) {
 			return 2;
-		} else {
-			return 3;
-		}
+		} 
+		return 3;
 
+	}
+
+	public int updateByUuid(String uuid, Earthquake newData) {
+
+		Optional<Earthquake> found = earthRepo.findByUuid(uuid);
+		boolean taked = verifier.uuidAlreadyTaked(newData.getUuid(),uuid);
+		if (found.isPresent() && !taked) {
+			Earthquake temp = found.get();
+			temp.setDisasterName(newData.getDisasterName());
+			temp.setUuid(newData.getUuid());
+			temp.setDescription(newData.getDescription());
+			temp.setContinent(newData.getContinent());
+			temp.setCountry(newData.getCountry());
+			temp.setInvestigators(newData.getInvestigators());
+			temp.setImage(newData.getImage());
+			temp.setMagnitude(newData.getMagnitude());
+			earthRepo.save(temp);
+			return 0;
+		} else if (found.isPresent() && taked) {
+			return 1;
+		} else if (!found.isPresent()) {
+			return 2;
+		}
+		return 3;
+	}
+
+	public int deleteByUuid(String uuid) {
+		Optional<Earthquake> found = earthRepo.findByUuid(uuid);
+		if (found.isPresent()) {
+			earthRepo.delete(found.get());
+			return 0;
+		}
+		return 1;
 	}
 
 	@Override
@@ -88,11 +114,12 @@ public class EarthquakeService implements CRUDOperations<Earthquake> {
 
 	@Override
 	public boolean exists(Long id) {
-		return earthRepo.existsById(id) ? true : false;
+		return earthRepo.existsById(id);
 	}
 
 	public boolean exists(String uuid) {
-		return earthRepo.findByUuid(uuid).isEmpty();
+		Optional<Earthquake> found=earthRepo.findByUuid(uuid);
+		return found.isPresent();
 	}
 
 }

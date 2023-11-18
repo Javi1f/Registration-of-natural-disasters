@@ -4,39 +4,28 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import co.edu.unbosque.model.NaturalDisaster;
 import co.edu.unbosque.repository.NaturalDisasterRepository;
-import co.edu.unbosque.util.AESUtil;
 
+@Service
 public class NaturalDisasterService implements CRUDOperations<NaturalDisaster> {
 
 	@Autowired
 	private NaturalDisasterRepository natRepo;
+
 	@Autowired
-	private CountryService aux;
+	private UuidVerifier verifier;
 
 	public NaturalDisasterService() {
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public int create(NaturalDisaster data) {
-
-		try {
-
-			data.setDisasterName(AESUtil.encrypt(data.getDisasterName()));
-			data.setUuid(AESUtil.encrypt(data.getUuid()));
-			data.setDescription(AESUtil.encrypt(data.getDescription()));
-			data.getPlace().getDisasters().add(data);
-			aux.create(data.getPlace());
-			natRepo.save(data);
-
-			return 0;
-		} catch (Exception e) {
-			return 1;
-		}
-
+		if(verifier.uuidAlreadyTaked(data.getUuid()))return 1;
+		natRepo.save(data);
+		return 0;
 	}
 
 	@Override
@@ -56,29 +45,71 @@ public class NaturalDisasterService implements CRUDOperations<NaturalDisaster> {
 		}
 	}
 
+	public int deleteByUuid(String uuid) {
+		Optional<NaturalDisaster> found = natRepo.findByUuid(uuid);
+
+		if (found.isPresent()) {
+			natRepo.delete(found.get());
+			return 0;
+		} else {
+			return 1;
+		}
+	}
+
 	@Override
 	public int updateById(Long id, NaturalDisaster newData) {
-
 		Optional<NaturalDisaster> found = natRepo.findById(id);
-		Optional<NaturalDisaster> newFound = natRepo.findByUuid(AESUtil.encrypt(newData.getUuid()));
-
-		if (found.isPresent() && !newFound.isPresent()) {
+		boolean taked = false;
+		if (found.isPresent())
+			taked = verifier.uuidAlreadyTaked(newData.getUuid(),found.get().getUuid());
+		else
+			taked = verifier.uuidAlreadyTaked(newData.getUuid());
+		if (found.isPresent() && !taked) {
 			NaturalDisaster temp = found.get();
-			temp.setDisasterName(AESUtil.encrypt(newData.getDisasterName()));
-			temp.setUuid(AESUtil.encrypt(newData.getUuid()));
-			temp.setDescription(AESUtil.encrypt(newData.getDescription()));
-			temp.getPlace().getDisasters().add(newData);
-			aux.create(temp.getPlace());
+			temp.setDisasterName(newData.getDisasterName());
+			temp.setUuid(newData.getUuid());
+			temp.setDescription(newData.getDescription());
+			temp.setContinent(newData.getContinent());
+			temp.setCountry(newData.getCountry());
+			temp.setInvestigators(newData.getInvestigators());
+			temp.setImage(newData.getImage());
 			natRepo.save(temp);
 			return 0;
-		} else if (found.isPresent() && newFound.isPresent()) {
+		} else if (found.isPresent() && taked) {
 			return 1;
 		} else if (!found.isPresent()) {
 			return 2;
-		} else {
-			return 3;
 		}
+		return 3;
 
+	}
+
+	public int updateByUuid(String uuid, NaturalDisaster newData) {
+		Optional<NaturalDisaster> found = natRepo.findByUuid(uuid);
+		boolean taked = verifier.uuidAlreadyTaked(newData.getUuid(),uuid);
+		if (found.isPresent() && !taked) {
+			NaturalDisaster temp = found.get();
+			temp.setDisasterName(newData.getDisasterName());
+			temp.setUuid(newData.getUuid());
+			temp.setDescription(newData.getDescription());
+			temp.setContinent(newData.getContinent());
+			temp.setCountry(newData.getCountry());
+			temp.setInvestigators(newData.getInvestigators());
+			temp.setImage(newData.getImage());
+			natRepo.save(temp);
+			return 0;
+		} else if (found.isPresent() && taked) {
+			return 1;
+		} else if (!found.isPresent()) {
+			return 2;
+		}
+		return 3;
+	}
+	
+	public void removeInvestigatorOfDisaster(String removed) {
+		for(int i=0;i<natRepo.findAll().size();i++) {
+			natRepo.findAll().get(i).removeInvestigator(removed);
+		}
 	}
 
 	@Override
@@ -88,11 +119,16 @@ public class NaturalDisasterService implements CRUDOperations<NaturalDisaster> {
 
 	@Override
 	public boolean exists(Long id) {
-		return natRepo.existsById(id) ? true : false;
+		return natRepo.existsById(id);
 	}
 
 	public boolean exists(String uuid) {
-		return natRepo.findByUuid(uuid).isEmpty();
+		Optional<NaturalDisaster> found=natRepo.findByUuid(uuid);
+		return found.isPresent();
+	}
+	
+	public NaturalDisaster get(String uuid) {
+		return natRepo.getByUuid(uuid);
 	}
 
 }

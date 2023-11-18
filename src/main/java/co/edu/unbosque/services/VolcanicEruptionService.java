@@ -4,39 +4,27 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import co.edu.unbosque.model.VolcanicEruption;
 import co.edu.unbosque.repository.VolcanicEruptionRepository;
-import co.edu.unbosque.util.AESUtil;
 
+@Service
 public class VolcanicEruptionService implements CRUDOperations<VolcanicEruption> {
 
 	@Autowired
 	private VolcanicEruptionRepository volRepo;
 
 	@Autowired
-	private CountryService aux;
+	private UuidVerifier verifier;
 
-	public VolcanicEruptionService() {
-		// TODO Auto-generated constructor stub
-	}
+	public VolcanicEruptionService() {}
 
 	@Override
 	public int create(VolcanicEruption data) {
-
-		try {
-
-			data.setDisasterName(AESUtil.encrypt(data.getDisasterName()));
-			data.setUuid(AESUtil.encrypt(data.getUuid()));
-			data.setDescription(AESUtil.encrypt(data.getDescription()));
-			data.getPlace().getDisasters().add(data);
-			aux.create(data.getPlace());
-			volRepo.save(data);
-
-			return 0;
-		} catch (Exception e) {
-			return 1;
-		}
+		if(verifier.uuidAlreadyTaked(data.getUuid()))return 1;
+		volRepo.save(data);
+		return 0;
 
 	}
 
@@ -52,34 +40,68 @@ public class VolcanicEruptionService implements CRUDOperations<VolcanicEruption>
 		if (found.isPresent()) {
 			volRepo.delete(found.get());
 			return 0;
-		} else {
-			return 1;
 		}
+		return 1;
+	}
+	
+	public int deleteByUuid(String uuid) {
+		Optional<VolcanicEruption> found = volRepo.findByUuid(uuid);
+
+		if (found.isPresent()) {
+			volRepo.delete(found.get());
+			return 0;
+		}
+		return 1;
 	}
 
 	@Override
 	public int updateById(Long id, VolcanicEruption newData) {
 
 		Optional<VolcanicEruption> found = volRepo.findById(id);
-		Optional<VolcanicEruption> newFound = volRepo.findByUuid(AESUtil.encrypt(newData.getUuid()));
-
-		if (found.isPresent() && !newFound.isPresent()) {
+		boolean taked = false;
+		if(found.isPresent())taked = verifier.uuidAlreadyTaked(newData.getUuid(),found.get().getUuid());
+		else taked = verifier.uuidAlreadyTaked(newData.getUuid());
+		if (found.isPresent() && !taked) {
 			VolcanicEruption temp = found.get();
-			temp.setDisasterName(AESUtil.encrypt(newData.getDisasterName()));
-			temp.setUuid(AESUtil.encrypt(newData.getUuid()));
-			temp.setDescription(AESUtil.encrypt(newData.getDescription()));
-			temp.getPlace().getDisasters().add(newData);
-			aux.create(temp.getPlace());
+			temp.setDisasterName(newData.getDisasterName());
+			temp.setUuid(newData.getUuid());
+			temp.setDescription(newData.getDescription());
+			temp.setContinent(newData.getContinent());
+			temp.setCountry(newData.getCountry());
+			temp.setInvestigators(newData.getInvestigators());
+			temp.setImage(newData.getImage());
+			temp.setScope(newData.getScope());
 			volRepo.save(temp);
 			return 0;
-		} else if (found.isPresent() && newFound.isPresent()) {
+		} else if (found.isPresent() && taked) {
 			return 1;
 		} else if (!found.isPresent()) {
 			return 2;
-		} else {
-			return 3;
 		}
-
+		return 3;
+	}
+	
+	public int updateByUuid(String uuid, VolcanicEruption newData) {
+		Optional<VolcanicEruption> found = volRepo.findByUuid(uuid);
+		boolean taked = verifier.uuidAlreadyTaked(newData.getUuid(),uuid);
+		if (found.isPresent() && !taked) {
+			VolcanicEruption temp = found.get();
+			temp.setDisasterName(newData.getDisasterName());
+			temp.setUuid(newData.getUuid());
+			temp.setDescription(newData.getDescription());
+			temp.setContinent(newData.getContinent());
+			temp.setCountry(newData.getCountry());
+			temp.setInvestigators(newData.getInvestigators());
+			temp.setImage(newData.getImage());
+			temp.setScope(newData.getScope());
+			volRepo.save(temp);
+			return 0;
+		} else if (found.isPresent() && taked) {
+			return 1;
+		} else if (!found.isPresent()) {
+			return 2;
+		} 
+		return 3;
 	}
 
 	@Override
@@ -89,11 +111,12 @@ public class VolcanicEruptionService implements CRUDOperations<VolcanicEruption>
 
 	@Override
 	public boolean exists(Long id) {
-		return volRepo.existsById(id) ? true : false;
+		return volRepo.existsById(id);
 	}
 
 	public boolean exists(String uuid) {
-		return volRepo.findByUuid(uuid).isEmpty();
+		Optional<VolcanicEruption> found=volRepo.findByUuid(uuid);
+		return found.isPresent();
 	}
 
 }

@@ -4,38 +4,28 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import co.edu.unbosque.model.Hurricane;
 import co.edu.unbosque.repository.HurricaneRepository;
-import co.edu.unbosque.util.AESUtil;
 
+@Service
 public class HurricaneService implements CRUDOperations<Hurricane> {
 
 	@Autowired
 	private HurricaneRepository hurRepo;
 	@Autowired
-	private CountryService aux;
+	private UuidVerifier verifier;
+	
 
 	public HurricaneService() {
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public int create(Hurricane data) {
-
-		try {
-
-			data.setDisasterName(AESUtil.encrypt(data.getDisasterName()));
-			data.setUuid(AESUtil.encrypt(data.getUuid()));
-			data.setDescription(AESUtil.encrypt(data.getDescription()));
-			data.getPlace().getDisasters().add(data);
-			aux.create(data.getPlace());
-			hurRepo.save(data);
-
-			return 0;
-		} catch (Exception e) {
-			return 1;
-		}
+		if(verifier.uuidAlreadyTaked(data.getUuid()))return 1;
+		hurRepo.save(data);
+		return 0;
 
 	}
 
@@ -51,34 +41,67 @@ public class HurricaneService implements CRUDOperations<Hurricane> {
 		if (found.isPresent()) {
 			hurRepo.delete(found.get());
 			return 0;
-		} else {
-			return 1;
 		}
+		return 1;
+	}
+	
+	public int deleteByUuid(String uuid) {
+		Optional<Hurricane> found = hurRepo.findByUuid(uuid);
+
+		if (found.isPresent()) {
+			hurRepo.delete(found.get());
+			return 0;
+		}
+		return 1;
 	}
 
 	@Override
 	public int updateById(Long id, Hurricane newData) {
-
 		Optional<Hurricane> found = hurRepo.findById(id);
-		Optional<Hurricane> newFound = hurRepo.findByUuid(AESUtil.encrypt(newData.getUuid()));
-
-		if (found.isPresent() && !newFound.isPresent()) {
+		boolean taked = false;
+		if(found.isPresent())taked = verifier.uuidAlreadyTaked(newData.getUuid(),found.get().getUuid());
+		else taked = verifier.uuidAlreadyTaked(newData.getUuid());
+		if (found.isPresent() && !taked) {
 			Hurricane temp = found.get();
-			temp.setDisasterName(AESUtil.encrypt(newData.getDisasterName()));
-			temp.setUuid(AESUtil.encrypt(newData.getUuid()));
-			temp.setDescription(AESUtil.encrypt(newData.getDescription()));
-			temp.getPlace().getDisasters().add(newData);
-			aux.create(temp.getPlace());
+			temp.setDisasterName(newData.getDisasterName());
+			temp.setUuid(newData.getUuid());
+			temp.setDescription(newData.getDescription());
+			temp.setContinent(newData.getContinent());
+			temp.setCountry(newData.getCountry());
+			temp.setInvestigators(newData.getInvestigators());
+			temp.setImage(newData.getImage());
+			temp.setMagnitude(newData.getMagnitude());;
 			hurRepo.save(temp);
 			return 0;
-		} else if (found.isPresent() && newFound.isPresent()) {
+		} else if (found.isPresent() && taked) {
 			return 1;
 		} else if (!found.isPresent()) {
 			return 2;
-		} else {
-			return 3;
-		}
-
+		} 
+		return 3;
+	}
+	
+	public int updateByUuid(String uuid, Hurricane newData) {
+		Optional<Hurricane> found = hurRepo.findByUuid(uuid);
+		boolean taked = verifier.uuidAlreadyTaked(newData.getUuid(),uuid);
+		if (found.isPresent() && !taked) {
+			Hurricane temp = found.get();
+			temp.setDisasterName(newData.getDisasterName());
+			temp.setUuid(newData.getUuid());
+			temp.setDescription(newData.getDescription());
+			temp.setContinent(newData.getContinent());
+			temp.setCountry(newData.getCountry());
+			temp.setInvestigators(newData.getInvestigators());
+			temp.setImage(newData.getImage());
+			temp.setMagnitude(newData.getMagnitude());
+			hurRepo.save(temp);
+			return 0;
+		} else if (found.isPresent() && taked) {
+			return 1;
+		} else if (!found.isPresent()) {
+			return 2;
+		} 
+		return 3;
 	}
 
 	@Override
@@ -92,7 +115,8 @@ public class HurricaneService implements CRUDOperations<Hurricane> {
 	}
 
 	public boolean exists(String uuid) {
-		return hurRepo.findByUuid(uuid).isEmpty();
+		Optional<Hurricane> found=hurRepo.findByUuid(uuid);
+		return found.isPresent();
 	}
 
 }

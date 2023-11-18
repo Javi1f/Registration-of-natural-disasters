@@ -4,17 +4,19 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import co.edu.unbosque.model.Tsunami;
 import co.edu.unbosque.repository.TsunamiRepository;
-import co.edu.unbosque.util.AESUtil;
 
+@Service
 public class TsunamiService implements CRUDOperations<Tsunami> {
 
 	@Autowired
 	private TsunamiRepository tsuRepo;
+
 	@Autowired
-	private CountryService aux;
+	private UuidVerifier verifier;
 
 	public TsunamiService() {
 		// TODO Auto-generated constructor stub
@@ -22,20 +24,9 @@ public class TsunamiService implements CRUDOperations<Tsunami> {
 
 	@Override
 	public int create(Tsunami data) {
-
-		try {
-
-			data.setDisasterName(AESUtil.encrypt(data.getDisasterName()));
-			data.setUuid(AESUtil.encrypt(data.getUuid()));
-			data.setDescription(AESUtil.encrypt(data.getDescription()));
-			data.getPlace().getDisasters().add(data);
-			aux.create(data.getPlace());
-			tsuRepo.save(data);
-
-			return 0;
-		} catch (Exception e) {
-			return 1;
-		}
+		if(verifier.uuidAlreadyTaked(data.getUuid()))return 1;
+		tsuRepo.save(data);
+		return 0;
 
 	}
 
@@ -55,30 +46,68 @@ public class TsunamiService implements CRUDOperations<Tsunami> {
 			return 1;
 		}
 	}
+	
+	public int deleteByUuid(String uuid) {
+		Optional<Tsunami> found = tsuRepo.findByUuid(uuid);
+
+		if (found.isPresent()) {
+			tsuRepo.delete(found.get());
+			return 0;
+		} 
+		return 1;
+	}
 
 	@Override
 	public int updateById(Long id, Tsunami newData) {
 
 		Optional<Tsunami> found = tsuRepo.findById(id);
-		Optional<Tsunami> newFound = tsuRepo.findByUuid(AESUtil.encrypt(newData.getUuid()));
-
-		if (found.isPresent() && !newFound.isPresent()) {
+		boolean taked = false;
+		if (found.isPresent())
+			taked = verifier.uuidAlreadyTaked(newData.getUuid(),found.get().getUuid());
+		else
+			taked = verifier.uuidAlreadyTaked(newData.getUuid());
+		if (found.isPresent() && !taked) {
 			Tsunami temp = found.get();
-			temp.setDisasterName(AESUtil.encrypt(newData.getDisasterName()));
-			temp.setUuid(AESUtil.encrypt(newData.getUuid()));
-			temp.setDescription(AESUtil.encrypt(newData.getDescription()));
-			temp.getPlace().getDisasters().add(newData);
-			aux.create(temp.getPlace());
+			temp.setDisasterName(newData.getDisasterName());
+			temp.setUuid(newData.getUuid());
+			temp.setDescription(newData.getDescription());
+			temp.setContinent(newData.getContinent());
+			temp.setCountry(newData.getCountry());
+			temp.setInvestigators(newData.getInvestigators());
+			temp.setImage(newData.getImage());
+			temp.setWaveHeight(newData.getWaveHeight());
 			tsuRepo.save(temp);
 			return 0;
-		} else if (found.isPresent() && newFound.isPresent()) {
+		} else if (found.isPresent() && taked) {
 			return 1;
 		} else if (!found.isPresent()) {
 			return 2;
-		} else {
-			return 3;
 		}
+		return 3;
 
+	}
+
+	public int updateByUuid(String uuid, Tsunami newData) {
+		Optional<Tsunami> found = tsuRepo.findByUuid(uuid);
+		boolean taked = verifier.uuidAlreadyTaked(newData.getUuid(),uuid);
+		if (found.isPresent() && !taked) {
+			Tsunami temp = found.get();
+			temp.setDisasterName(newData.getDisasterName());
+			temp.setUuid(newData.getUuid());
+			temp.setDescription(newData.getDescription());
+			temp.setContinent(newData.getContinent());
+			temp.setCountry(newData.getCountry());
+			temp.setInvestigators(newData.getInvestigators());
+			temp.setImage(newData.getImage());
+			temp.setWaveHeight(newData.getWaveHeight());
+			tsuRepo.save(temp);
+			return 0;
+		} else if (found.isPresent() && taked) {
+			return 1;
+		} else if (!found.isPresent()) {
+			return 2;
+		}
+		return 3;
 	}
 
 	@Override
@@ -92,7 +121,8 @@ public class TsunamiService implements CRUDOperations<Tsunami> {
 	}
 
 	public boolean exists(String uuid) {
-		return tsuRepo.findByUuid(uuid).isEmpty();
+		Optional<Tsunami> found=tsuRepo.findByUuid(uuid);
+		return found.isPresent();
 	}
 
 }

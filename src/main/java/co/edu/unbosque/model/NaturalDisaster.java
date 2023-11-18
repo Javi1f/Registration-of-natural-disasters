@@ -1,5 +1,6 @@
 package co.edu.unbosque.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -18,22 +19,20 @@ public class NaturalDisaster {
 	private @Id @GeneratedValue(strategy = GenerationType.IDENTITY) Long id;
 	@Column(unique = true)
 	private String uuid;
-	private Country place;
-	private Investigator[] investigators;
+	private String continent;
+	private String country;
+	private ArrayList<String> investigators;
 	private String disasterName;
 	private String description;
 	@Lob
 	private byte[] image;
 
-	public NaturalDisaster() {
-	}
+	public NaturalDisaster() {}
 
-	public NaturalDisaster(Long id, String uuid, Country place, Investigator[] investigators, String disasterName,
-			String description, byte[] image) {
-		super();
-		this.id = id;
+	public NaturalDisaster(String uuid, String continent, String country, ArrayList<String> investigators,String disasterName, String description, byte[] image) {
 		this.uuid = uuid;
-		this.place = place;
+		this.continent = continent;
+		this.country = country;
 		this.investigators = investigators;
 		this.disasterName = disasterName;
 		this.description = description;
@@ -54,22 +53,6 @@ public class NaturalDisaster {
 
 	public void setUuid(String uuid) {
 		this.uuid = uuid;
-	}
-
-	public Country getPlace() {
-		return place;
-	}
-
-	public void setPlace(Country place) {
-		this.place = place;
-	}
-
-	public Investigator[] getInvestigators() {
-		return investigators;
-	}
-
-	public void setInvestigators(Investigator[] investigators) {
-		this.investigators = investigators;
 	}
 
 	public String getDisasterName() {
@@ -96,13 +79,36 @@ public class NaturalDisaster {
 		this.description = description;
 	}
 
+	public String getContinent() {
+		return continent;
+	}
+
+	public void setContinent(String continent) {
+		this.continent = continent;
+	}
+
+	public String getCountry() {
+		return country;
+	}
+
+	public void setCountry(String country) {
+		this.country = country;
+	}
+
+	public ArrayList<String> getInvestigators() {
+		return investigators;
+	}
+
+	public void setInvestigators(ArrayList<String> investigators) {
+		this.investigators = investigators;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + Arrays.hashCode(image);
-		result = prime * result + Arrays.hashCode(investigators);
-		result = prime * result + Objects.hash(description, disasterName, id, place, uuid);
+		result = prime * result + Objects.hash(continent, country, description, disasterName, id, investigators, uuid);
 		return result;
 	}
 
@@ -115,17 +121,34 @@ public class NaturalDisaster {
 		if (getClass() != obj.getClass())
 			return false;
 		NaturalDisaster other = (NaturalDisaster) obj;
-		return Objects.equals(description, other.description) && Objects.equals(disasterName, other.disasterName)
+		return Objects.equals(continent, other.continent) && Objects.equals(country, other.country)
+				&& Objects.equals(description, other.description) && Objects.equals(disasterName, other.disasterName)
 				&& Objects.equals(id, other.id) && Arrays.equals(image, other.image)
-				&& Arrays.equals(investigators, other.investigators) && Objects.equals(place, other.place)
-				&& Objects.equals(uuid, other.uuid);
+				&& Objects.equals(investigators, other.investigators) && Objects.equals(uuid, other.uuid);
 	}
 
 	@Override
 	public String toString() {
-		return "NaturalDisaster [id=" + id + ", uuid=" + uuid + ", place=" + place + ", investigators="
-				+ Arrays.toString(investigators) + ", disasterName=" + disasterName + ", description=" + description
+		return "NaturalDisaster [id=" + id + ", uuid=" + uuid + ", continent=" + continent + ", country=" + country
+				+ ", investigators=" + investigators + ", disasterName=" + disasterName + ", description=" + description
 				+ ", image=" + Arrays.toString(image) + "]";
+	}
+	
+	public boolean containsInvestigator(String uuidInv) {
+		for(String aux:investigators) {
+			if(aux.equals(uuidInv))return true;
+		}
+		return false;
+	}
+	
+	public boolean removeInvestigator(String removed) {
+		for(int i=0;i<investigators.size();i++) {
+			if(investigators.get(i).equals(removed)) {
+				investigators.remove(i);
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

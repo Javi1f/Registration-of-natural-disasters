@@ -1,5 +1,6 @@
 package co.edu.unbosque.model;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 import jakarta.persistence.DiscriminatorValue;
@@ -19,30 +20,19 @@ public class VolcanicEruption extends NaturalDisaster {
 		// TODO Auto-generated constructor stub
 	}
 
-	public VolcanicEruption(Long id, float scope) {
-		super();
-		this.id = id;
+	public VolcanicEruption(float scope) {
 		this.scope = scope;
 	}
 
-	public VolcanicEruption(Long id, String uuid, Country place, Investigator[] investigators, String disasterName,
-			String description, byte[] image, Long id2, float scope) {
-		super(id, uuid, place, investigators, disasterName, description, image);
-		id = id2;
+	public VolcanicEruption(String uuid, String continent, String country, ArrayList<String> investigators,String disasterName, String description, byte[] image, float scope) {
+		super(uuid, continent, country, investigators, disasterName, description, image);
 		this.scope = scope;
 	}
+	
+	
 
-	public VolcanicEruption(Long id, String uuid, Country place, Investigator[] investigators, String disasterName,
-			String description, byte[] image) {
-		super(id, uuid, place, investigators, disasterName, description, image);
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
+	public VolcanicEruption(String uuid, String continent, String country, ArrayList<String> investigators,String disasterName, String description, byte[] image) {
+		super(uuid, continent, country, investigators, disasterName, description, image);
 	}
 
 	public float getScope() {

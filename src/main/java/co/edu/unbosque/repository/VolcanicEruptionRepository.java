@@ -8,7 +8,6 @@ import co.edu.unbosque.model.VolcanicEruption;
 
 public interface VolcanicEruptionRepository extends JpaRepository<VolcanicEruption, Long>{
 
-	public Optional<VolcanicEruption> findByUuid(String name);
-	
-	public void deleteByUuid(String name);
+	public Optional<VolcanicEruption> findByUuid(String uuid);
+	public VolcanicEruption getByUuid(String uuid);
 }

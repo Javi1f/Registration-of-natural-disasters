@@ -8,8 +8,6 @@ import co.edu.unbosque.model.Hurricane;
 
 public interface HurricaneRepository extends JpaRepository<Hurricane, Long> {
 
-	public Optional<Hurricane> findByUuid(String name);
-
-	public void deleteByUuid(String name);
-
+	public Optional<Hurricane> findByUuid(String uuid);
+	public Hurricane getByUuid(String uuid);
 }
